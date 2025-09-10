@@ -15,6 +15,7 @@ services:
   backend:
     build:
       context: ./Django_Server
+      network: host
     environment:
       DJANGO_DEBUG: "1"
       DJANGO_SECRET_KEY: dev-secret

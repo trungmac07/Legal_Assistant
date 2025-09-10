@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 COPY ./requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt && python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('truro7/vn-law-embedding')"
 
 COPY . /app
 

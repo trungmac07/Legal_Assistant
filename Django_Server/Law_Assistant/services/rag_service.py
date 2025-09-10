@@ -99,15 +99,15 @@ CHÚ Ý:
         return chunk
     
     def generate_response(self, prompt):
-        stream = self.client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "system", "content": f"Bạn là người trợ lý pháp luật."}, {"role": "user", "content": f"{prompt}"}],
-            stream=True,
-        )
+        # stream = self.client.chat.completions.create(
+        #     model="gpt-4o-mini",
+        #     messages=[{"role": "system", "content": f"Bạn là người trợ lý pháp luật."}, {"role": "user", "content": f"{prompt}"}],
+        #     stream=True,
+        # )
 
-        return stream
+        # return stream
 
-        #return self.stimulate_stream(prompt)
+        return self.stimulate_stream(prompt)
         
     def send_message(self, text):
         top_k_indices = self.get_top_documents(text, self.top_k)
