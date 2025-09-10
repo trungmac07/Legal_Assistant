@@ -31,41 +31,32 @@ const getAccessToken = () => {
 
 const ProtectedRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null); 
-  
+
   useEffect(() => {
     const checkAuth = async () => {
-      const token = getAccessToken();
-
-      if (!token) {
-        
-        setIsAuthenticated(false);
-        return;
-      }
-      
-      if (check_token_expired(token)) {
-        
-        try {
-          const newToken = await refreshAccessToken();
-          if (newToken && !check_token_expired(newToken)) {
-            setIsAuthenticated(true);
-            return;
-          }
-        } catch (error) {
-          console.error('Token refresh failed:', error);
+      try {
+        let token = window.accessToken;
+        if (!token || check_token_expired(token)) {
+          token = await refreshAccessToken();
         }
+
+        if (token && !check_token_expired(token)) {
+          setIsAuthenticated(true);
+          window.accessToken = token;
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (err) {
+        console.error("Token refresh failed", err);
         setIsAuthenticated(false);
-      } else {
-        
-        setIsAuthenticated(true);
       }
     };
-    
+
     checkAuth();
   }, []);
 
-  
   if (isAuthenticated === null) {
-    return <div>Loading...</div>; 
+    return <div>Loading...</div>;
   }
 
   return isAuthenticated ? children : <Navigate to="/login" />;
@@ -74,45 +65,38 @@ const ProtectedRoute = ({ children }) => {
 
 const PublicRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null); 
-  
+
   useEffect(() => {
     const checkAuth = async () => {
-      const token = getAccessToken();
-      
-      if (!token) {
-        
-        setIsAuthenticated(false);
-        return;
-      }
-      
-      if (check_token_expired(token)) {
-        
-        try {
-          const newToken = await refreshAccessToken();
-          if (newToken && !check_token_expired(newToken)) {
-            setIsAuthenticated(true);
-            return;
-          }
-        } catch (error) {
-          
+      try {
+        let token = window.accessToken;
+
+        if (!token || check_token_expired(token)) {
+            token = await refreshAccessToken();
         }
+
+        if (token && !check_token_expired(token)) {
+          setIsAuthenticated(true);
+          window.accessToken = token;
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (err) {
+        console.error("Token refresh failed", err);
         setIsAuthenticated(false);
-      } else {
-        
-        setIsAuthenticated(true);
       }
     };
-    
+
     checkAuth();
   }, []);
 
-  
   if (isAuthenticated === null) {
     return <div>Loading...</div>;
   }
 
   return isAuthenticated ? <Navigate to="/home" /> : children;
 };
+
 
 function RoutesApp() {
   return (

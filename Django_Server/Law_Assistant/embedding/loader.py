@@ -11,7 +11,7 @@ def get_embedding_model(device: str = 'cpu', truncate_dim: int = 128) -> Sentenc
 
 def encode_texts(texts, device: str = 'cpu', truncate_dim:int = 128):
     model = get_embedding_model(device, truncate_dim=truncate_dim)
-    embeddings = model.encode(texts, convert_to_numpy=False, device=device, normalize_embeddings=True)
+    embeddings = model.encode(texts, convert_to_numpy=False, device=device, normalize_embeddings=True, truncate_dim=truncate_dim)
     if isinstance(embeddings, torch.Tensor):
         return embeddings
     return torch.tensor(embeddings, device=device)

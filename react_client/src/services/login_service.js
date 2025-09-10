@@ -1,4 +1,5 @@
 import { api, setAuthTokens } from '../utils/api';
+import axios from 'axios';
 
 const getAccessToken = () => {
   return window.accessToken;
@@ -44,18 +45,21 @@ export const post_login = async (url, email, password) => {
 
 
 export const refreshAccessTokenService = async () => {
-  try {
-    const response = await api.post('/api/token/refresh/', {}, {
+  try 
+  {
+    const response = await axios.post('/api/token/refresh/', {}, {
       withCredentials: true, 
     });
     
     setAccessToken(response.data["access_token"]);
+    //sessionStorage.setItem('user_id', response.data["user_id"]);
     return response.data["access_token"];
-  } catch (error) {
-    
-    
+  } 
+  catch (error) 
+  {
     removeAccessToken();
     sessionStorage.removeItem('user_id');
+
     return null;
   }
 };

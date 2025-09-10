@@ -4,7 +4,8 @@ from rest_framework import status
 from django.contrib.auth import authenticate
 from django.conf import settings
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 from Law_Assistant.components.signup_form import SignUpForm
 from Law_Assistant.models import User
 

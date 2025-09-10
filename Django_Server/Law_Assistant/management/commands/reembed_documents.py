@@ -3,7 +3,7 @@ from django.apps import apps
 import os
 import torch
 from Law_Assistant.embedding.loader import get_embedding_model
-from Django_Server.config import LAW_DOCS_PATH, VECTORDB_PATH
+from Django_Server.config import LAW_DOCS_PATH, VECTORDB_PATH, TRUNCATE_DIM
 
 
 class Command(BaseCommand):
@@ -30,7 +30,8 @@ class Command(BaseCommand):
                     texts.append(f.read())
 
         self.stdout.write(self.style.NOTICE(f'Encoding {len(texts)} documents ...'))
-        embeddings = model.encode(texts, convert_to_numpy=False, device=device, normalize_embeddings=True)
+        embeddings = model.encode(texts, convert_to_numpy=False, device=device, normalize_embeddings=True, truncate_dim=TRUNCATE_DIM)
+        embeddings = [i.to('cpu') for i in embeddings]
         torch.save(embeddings, out_path)
         self.stdout.write(self.style.SUCCESS(f'Embeddings saved to {out_path}'))
 
