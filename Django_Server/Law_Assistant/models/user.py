@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 from django.utils import timezone
 
+
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -13,20 +14,18 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
-        
         extra_fields.setdefault('role', 'admin')
-
         if extra_fields.get('role') != 'admin':
             raise ValueError('Superuser must have role=admin.')
-
         return self.create_user(email, password, **extra_fields)
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     GENDER_CHOICES = [
         ('M', 'Male'),
         ('F', 'Female'),
     ]
-    
+
     ROLE_CHOICES = [
         ('admin', 'Admin'),
         ('client', 'Client'),
@@ -46,18 +45,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    #REQUIRED_FIELDS = []
 
     def __str__(self):
         return self.email
-    
-class Conversation(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    conversation_name = models.CharField(max_length=100)
-    create_date = models.DateTimeField()
 
-class Message(models.Model):
-    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE)
-    create_date = models.DateTimeField()
-    sender = models.CharField(max_length=4)
-    text = models.TextField()
+

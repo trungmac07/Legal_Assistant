@@ -4,6 +4,9 @@ import datasets, accelerate
 import torch
 import torch.nn.functional as F
 import os
+from Django_Server.config import *
+from Law_Assistant.embedding.loader import get_embedding_model
+from types import SimpleNamespace
 
 class RAGService:
     def __init__(self, 
@@ -22,10 +25,8 @@ class RAGService:
         self.device = device if torch.cuda.is_available() else "cpu"
         self.openai_model = openai_model
 
-        self.model = SentenceTransformer(
-            model_path, device=self.device, truncate_dim = truncate_dim
-        )
-        self.embedding_docs = torch.load(vectordb_path, weights_only=False).to(self.device)
+        self.model = get_embedding_model(self.device, self.truncate_dim)
+        self.embedding_docs = torch.stack(torch.load(vectordb_path, weights_only=False), dim=0).to(self.device)
 
         if(self.embedding_docs.shape[-1] != truncate_dim):
             raise ValueError(f"The embedding database shape does not match the model's truncate dimension. {self.embedding_docs.shape[-1]} and {truncate_dim}")
@@ -41,30 +42,22 @@ class RAGService:
             api_key = self.api_key
         )
 
-
         self.all_laws = []
 
         files = sorted(os.listdir(law_docs_path))
         self.law_doc_files = files
         self.all_laws = dict()
-        
-        # for i,file in enumerate(files):
-        #     if((i+1) % 1000 == 0):
-        #         print(i+1)
-        #     with open(os.path.join(law_docs_path,file), 'r', encoding="utf-8") as f:
-        #         l = f.read()
-        #         self.all_laws.append(l[:5000])
-
-
 
     def embed_query(self, query):
-        return torch.tensor(self.model.encode(query), device=self.device).unsqueeze(0)
+        embedding = self.model.encode(query, convert_to_numpy=False, device=self.device, normalize_embeddings=True)
+        if not isinstance(embedding, torch.Tensor):
+            embedding = torch.tensor(embedding, device=self.device)
+        return embedding.unsqueeze(0)
 
     def get_top_documents(self, question, k = 3):
         embedding = self.embed_query(question)
-        cosine_similarities = F.cosine_similarity(embedding.unsqueeze(0).expand(self.embedding_docs.shape[0], 1, 128), self.embedding_docs, dim = -1).view(-1)
+        cosine_similarities = F.cosine_similarity(embedding.unsqueeze(0).expand(self.embedding_docs.shape[0], 1, self.truncate_dim), self.embedding_docs, dim = -1).view(-1)
         top_k = cosine_similarities.topk(k)
-        print(top_k)
         top_k_indices = top_k.indices
         top_k_values = top_k.values
         if(top_k_values[0] < 0.6):
@@ -87,7 +80,6 @@ class RAGService:
             prompt = "Tôi cung cấp cho bạn một số văn bản pháp luật có liên quan như sau: \n\n"
             
             for k in top_k_indices:
-                print(k)
                 prompt += self.retrieve_doc(k) + "\n\n"
 
             prompt += f"Từ những văn bản pháp luật trên, hãy giúp tôi trả lời cụ thể cho câu hỏi sau: \n\n{question}\n\n"
@@ -101,9 +93,12 @@ CHÚ Ý:
                 """
             return prompt
 
-
+    def stimulate_stream(self, text):
+        
+        chunk = [SimpleNamespace(choices=[SimpleNamespace(delta=SimpleNamespace(content=i+" "))]) for i in text.split(" ")]
+        return chunk
+    
     def generate_response(self, prompt):
-        print("PROMPT: ",prompt)
         stream = self.client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[{"role": "system", "content": f"Bạn là người trợ lý pháp luật."}, {"role": "user", "content": f"{prompt}"}],
@@ -112,8 +107,12 @@ CHÚ Ý:
 
         return stream
 
+        #return self.stimulate_stream(prompt)
+        
     def send_message(self, text):
         top_k_indices = self.get_top_documents(text, self.top_k)
         prompt = self.generate_prompt(text, top_k_indices)
         response_stream = self.generate_response(prompt)
         return response_stream
+
+

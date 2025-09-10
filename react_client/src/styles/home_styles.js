@@ -74,7 +74,7 @@ export const styles = {
       fontSize: '17px',
       lineHeight: '21px',
       wordWrap: 'break-word',
-      // Prevent XSS vulnerabilities
+      
       whiteSpace: 'pre-wrap',
     },
     inputContainer: {
@@ -87,8 +87,8 @@ export const styles = {
    
     },
     textarea : {
-      width: '100%', // Ensure the textarea fills the container width
-      height: '75%', // Set the height to 75% of its container
+      width: '100%', 
+      height: '75%', 
       border: 'none',
       outline: 'none',
       padding: '15px',
@@ -96,9 +96,9 @@ export const styles = {
       borderRadius: '8px',
       backgroundColor: '#e0f7fa',
       resize: 'none', 
-      overflowWrap: 'break-word', // Ensures long words break onto the next line
-      wordWrap: 'break-word', // Ensures the text wraps within the box
-      whiteSpace: 'pre-wrap', // Preserves white spaces and wraps the text as needed
+      overflowWrap: 'break-word', 
+      wordWrap: 'break-word', 
+      whiteSpace: 'pre-wrap', 
       fontFamily : 'arial',
     },
     input: {

@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
 import { marked } from 'marked';
 import { home_controller } from '../controllers/home_controller';
 import { styles } from '../styles/home_styles';
-import ReactMarkdown from 'react-markdown'
 import { FaPlusCircle } from "react-icons/fa";
+import AppLayout from '../layouts/AppLayout';
 
 const HomeView = () => {
   const [conversations, setConversations] = useState([]);
@@ -15,21 +14,21 @@ const HomeView = () => {
   const [currentMessage, setCurrentMessage] = useState('');
   const chatContainerRef = useRef(null);
   
-  // useEffect(() => {
-  //   const fetchConversation = async () => {
-  //     if(!isNewChat)
-  //     {
-  //       try {
-  //         const response = await home_controller("HISTORY");
-  //         setSelectedConversation(response.data);
-  //       } catch (error) {
-  //         console.error('Failed to fetch conversation', error);
-  //       }
-  //     }
-  //   };
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
-  //   fetchConversation();
-  // }, [currentChatID]);
+  
+  
                                                         
   useEffect(() => {
     const fetchChatHistory = async () => {
@@ -46,7 +45,7 @@ const HomeView = () => {
 
   }, [isNewChat]);
 
-  // Handle sending messages
+  
   const handleSend = async () => {
     if (input.trim()) {
       const text = input.trim();
@@ -94,10 +93,8 @@ const HomeView = () => {
         const updatedWithError = [...oldMessages, errorMessage];
    
         setSelectedConversation(updatedWithError);
-        //console.log(selectedConversation)
-      }
 
-      
+      }
     }
 
     
@@ -110,21 +107,20 @@ const HomeView = () => {
       setIsNewChat(false);
   }
 
-  // Handle pressing Enter to send the message
   const handleKeyPress = (event) => {
     if (event.key === 'Enter') {
       handleSend();
     }
   };
 
-  // Scroll to the bottom of the chat container when new messages are added
+  
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [selectedConversation, currentMessage]);
 
-  // Render message text with Markdown formatting
+  
   const renderMessage = (text) => {
     if(text)
       return {__html: marked(text)};
@@ -132,70 +128,70 @@ const HomeView = () => {
       return {__html: ""};
   };
   
-  return (
-    <div style={styles.container}>
-      <div style={styles.sidebar}>
-        <div style={styles.sidebarTitle}>
-          <h2 style={{margin : 20}}>Conversations</h2>
-          <button style = {{color: '#004d40', background:"transparent", border:"transparent", cursor: 'pointer',}}
-                  onClick={() => {setIsNewChat(true); setSelectedConversation([]); setCurrentMessage('')}}>
-            <FaPlusCircle style={{fontSize:30, margin : 10}}/>
-          </button>
-        </div>
-        
-        <div style={styles.historyList}>
-          {conversations.map((conversation, index) => (
-            <div
-              key={index}
-              style={styles.historyItem}
-              onClick={() => retrieve_conversation(conversation["id"])}
-            >
-              {conversation["conversation_name"]}
-            </div>
-          ))}
-        </div>
+  const sidebar = (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={styles.sidebarTitle}>
+        <h2 style={{margin : 20}}>Conversations</h2>
+        <button style = {{color: '#004d40', background:"transparent", border:"transparent", cursor: 'pointer',}}
+                onClick={() => {setIsNewChat(true); setSelectedConversation([]); setCurrentMessage('')}}>
+          <FaPlusCircle style={{fontSize:30, margin : 10}}/>
+        </button>
       </div>
-      <div style={styles.chatArea}>
-        <div style={styles.chatFrame}>
-          <div style={styles.chatContainer} ref={chatContainerRef}>
-            {selectedConversation.map((msg, index) => (
-              <div
-                key={index}
-                style={{
-                  ...styles.message,
-                  alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
-                  backgroundColor: msg.sender === 'user' ? '#b2ebf2' : '#80deea',
-                }}
-                dangerouslySetInnerHTML={renderMessage(msg.text)}
-              />
-                
-           
-            ))}
-            {currentMessage ? (<div
-                key={"current_message"}
-                style={{
-                  ...styles.message,
-                  alignSelf: 'flex-start',
-                  backgroundColor: '#80deea',
-                }}
-                dangerouslySetInnerHTML={renderMessage(currentMessage)}
-              />) : null}
+      <div style={styles.historyList}>
+        {conversations.map((conversation, index) => (
+          <div
+            key={index}
+            style={styles.historyItem}
+            onClick={() => retrieve_conversation(conversation["id"])}
+          >
+            {conversation["conversation_name"]}
           </div>
-          <div style={styles.inputContainer}>
-            <textarea
-              style={styles.textarea}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder="Type a message..."
-            />
-            <button style={styles.sendButton} onClick={handleSend}>
-              Send
-            </button>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
+  );
+
+  return (
+    <AppLayout sidebar={sidebar}>
+      <div style={styles.chatFrame}>
+        <div style={styles.chatContainer} ref={chatContainerRef}>
+          {selectedConversation.map((msg, index) => (
+            <div
+              key={index}
+              style={{
+                ...styles.message,
+                alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
+                backgroundColor: msg.sender === 'user' ? '#b2ebf2' : '#80deea',
+              }}
+              dangerouslySetInnerHTML={renderMessage(msg.text)}
+            />
+          ))}
+          {currentMessage ? (
+            <div
+              key={"current_message"}
+              style={{
+                ...styles.message,
+                alignSelf: 'flex-start',
+                backgroundColor: '#80deea',
+              }}
+              dangerouslySetInnerHTML={renderMessage(currentMessage)}
+            />
+          ) : null}
+        </div>
+        <div style={styles.inputContainer}>
+          <textarea
+            style={styles.textarea}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyPress}
+            placeholder="Type a message..."
+          />
+          <button style={styles.sendButton} onClick={handleSend}>
+            Send
+          </button>
+        </div>
+      </div>
+    </AppLayout>
   );
 };
 

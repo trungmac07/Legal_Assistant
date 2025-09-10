@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import { api } from '../utils/api';
 
 export const get_conversation = async (url, data) => {
-    const token = sessionStorage.getItem('access_token')
     try {
         const c_id = data["conversation_id"]
-        let response = await axios.get(
+        let response = await api.get(
                 url, 
                 {
-                    headers : {"Authorization" : `Bearer ${token}`},
                     params : data
                 },
         );

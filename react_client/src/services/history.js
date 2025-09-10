@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import { api } from '../utils/api';
 
 export const get_history = async (url) => {
-    const token = sessionStorage.getItem('access_token')
     try {
-        let response = await axios.get(
+        let response = await api.get(
                 url, 
                 {
-                    headers : {"Authorization" : `Bearer ${token}`},
                     params: {"user_id": sessionStorage.getItem('user_id')},
                 },
         );
